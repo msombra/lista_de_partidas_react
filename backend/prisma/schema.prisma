@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Championship {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  clubs     Club[]
+  matches   Match[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Club {
+  id             Int          @id @default(autoincrement())
+  name           String
+  championshipId Int
+  championship   Championship @relation(fields: [championshipId], references: [id], onDelete: Restrict)
+  homeMatches    Match[]       @relation("HomeClubMatches")
+  awayMatches    Match[]       @relation("AwayClubMatches")
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@unique([name, championshipId])
+  @@index([championshipId])
+}
+
+model Match {
+  id             Int          @id @default(autoincrement())
+  championshipId Int
+  championship   Championship @relation(fields: [championshipId], references: [id], onDelete: Restrict)
+  homeClubId     Int
+  homeClub       Club         @relation("HomeClubMatches", fields: [homeClubId], references: [id], onDelete: Restrict)
+  awayClubId     Int?
+  awayClub       Club?        @relation("AwayClubMatches", fields: [awayClubId], references: [id], onDelete: Restrict)
+  awayTeamName   String?
+  weekDay        String
+  time           String
+  broadcast      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([championshipId])
+  @@index([homeClubId])
+  @@index([awayClubId])
+  @@index([weekDay, time])
+}

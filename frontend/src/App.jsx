@@ -1,5 +1,5 @@
 import '@/global.css'
-import { ConfigProvider, theme } from 'antd'
+import { App as AntdApp, ConfigProvider, theme } from 'antd'
 
 import { useThemeMode } from '@/hooks/useThemeMode.js'
 import { MainRouter } from '@/routes/MainRouter.jsx'
@@ -15,11 +15,15 @@ export const App = () => {
                     : theme.defaultAlgorithm,
             }}
         >
-            <MainRouter
-                darkMode={darkMode}
-                themeMode={themeMode}
-                setThemeMode={setThemeMode}
-            />
+            <AntdApp
+                notification={{ placement: 'bottomRight', duration: 3 }}
+            >
+                <MainRouter
+                    darkMode={darkMode}
+                    themeMode={themeMode}
+                    setThemeMode={setThemeMode}
+                />
+            </AntdApp>
         </ConfigProvider>
     )
 }
