@@ -12,6 +12,7 @@ const validWeekDays = new Set([
     'quarta',
     'quinta',
 ])
+const championsLeagueWeekDays = new Set(['terça', 'quarta', 'quinta'])
 
 const parseId = (value, field = 'ID') => {
     const id = Number(value)
@@ -66,10 +67,21 @@ const getMatchData = async (body, editingId) => {
 
     if (!championship) throw new AppError('Campeonato não encontrado.', 404)
     if (!homeClub) throw new AppError('Time mandante não encontrado.', 404)
-    if (homeClub.championshipId !== championshipId) {
+    const isChampionsLeague = championship.name.toLowerCase() === 'champions league'
+
+    if (isChampionsLeague && !championsLeagueWeekDays.has(weekDay)) {
+        throw new AppError(
+            'Partidas da Champions League devem ocorrer entre terça e quinta.'
+        )
+    }
+    if (!isChampionsLeague && homeClub.championshipId !== championshipId) {
         throw new AppError('O mandante não pertence ao campeonato selecionado.')
     }
-    if (awayClub && awayClub.championshipId !== championshipId) {
+    if (
+        !isChampionsLeague
+        && awayClub
+        && awayClub.championshipId !== championshipId
+    ) {
         throw new AppError('O visitante não pertence ao campeonato selecionado.')
     }
 

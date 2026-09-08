@@ -23,6 +23,7 @@ import { useEffect, useState } from 'react'
 import { MatchFormModal } from '@/components/MatchFormModal.jsx'
 import { weekDayOptions } from '@/data/matchOptions.js'
 import { getApiErrorMessage } from '@/services/api.js'
+import { listChampionships } from '@/services/championshipService.js'
 import { listClubs } from '@/services/clubService.js'
 import {
     createMatch,
@@ -45,6 +46,7 @@ export const Partidas = () => {
     const { modal, notification } = AntdApp.useApp()
     const [matches, setMatches] = useState([])
     const [clubs, setClubs] = useState([])
+    const [championships, setChampionships] = useState([])
     const [loading, setLoading] = useState(true)
     const [modalOpen, setModalOpen] = useState(false)
     const [editingMatch, setEditingMatch] = useState(null)
@@ -54,11 +56,12 @@ export const Partidas = () => {
     useEffect(() => {
         let active = true
 
-        Promise.all([listMatches(), listClubs()])
-            .then(([matchData, clubData]) => {
+        Promise.all([listMatches(), listClubs(), listChampionships()])
+            .then(([matchData, clubData, championshipData]) => {
                 if (!active) return
                 setMatches(matchData)
                 setClubs(clubData)
+                setChampionships(championshipData)
                 setActiveDays(getVisibleWeekDays(matchData))
             })
             .catch((error) => notification.error({
@@ -290,6 +293,7 @@ export const Partidas = () => {
                 match={editingMatch}
                 matches={matches}
                 clubs={clubs}
+                championships={championships}
                 onCancel={closeModal}
                 onSave={handleSave}
             />

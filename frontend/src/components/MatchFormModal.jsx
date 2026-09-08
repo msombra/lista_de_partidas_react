@@ -4,12 +4,11 @@ import { useEffect, useMemo } from 'react'
 import { weekDayOptions } from '@/data/matchOptions.js'
 
 const broadcastOptions = [
-    'Globo',
-    'SporTV',
-    'Premiere',
     'ESPN',
-    'Disney+',
     'CazéTV',
+    'HBO',
+    'GoatTV',
+    'YouTube',
     'Outro',
 ].map((broadcast) => ({ value: broadcast, label: broadcast }))
 
@@ -18,6 +17,7 @@ export const MatchFormModal = ({
     match,
     matches,
     clubs,
+    championships,
     onCancel,
     onSave,
 }) => {
@@ -41,16 +41,40 @@ export const MatchFormModal = ({
         return clubs.filter((club) => !usedClubIds.has(club.id))
     }, [clubs, match?.id, matches])
 
-    const championshipOptions = [...new Map(
-        availableClubs.map((club) => [
-            club.championshipId,
-            { value: club.championshipId, label: club.championship },
-        ])
-    ).values()]
+    const championshipOptions = championships
+        .filter((championship) => {
+            const isChampionsLeague = championship.name
+                .toLocaleLowerCase('pt-BR') === 'champions league'
+
+            return isChampionsLeague
+                ? availableClubs.length > 0
+                : availableClubs.some(
+                    (club) => club.championshipId === championship.id
+                )
+        })
+        .map((championship) => ({
+            value: championship.id,
+            label: championship.name,
+        }))
+
+    const selectedChampionshipData = championships.find(
+        (championship) => championship.id === selectedChampionship
+    )
+    const isChampionsLeague = selectedChampionshipData?.name
+        .toLocaleLowerCase('pt-BR') === 'champions league'
 
     const clubOptions = availableClubs
-        .filter((club) => club.championshipId === selectedChampionship)
+        .filter((club) =>
+            isChampionsLeague
+            || club.championshipId === selectedChampionship
+        )
         .map((club) => ({ value: club.id, label: club.name }))
+
+    const availableWeekDayOptions = isChampionsLeague
+        ? weekDayOptions.filter(({ value }) =>
+            ['terça', 'quarta', 'quinta'].includes(value)
+        )
+        : weekDayOptions
 
     const canSelectRegisteredVisitor = clubOptions.length > 1
     const usesExternalVisitor = !canSelectRegisteredVisitor
@@ -86,8 +110,13 @@ export const MatchFormModal = ({
     }, [form, match, open])
 
     const handleChampionshipChange = (championship) => {
-        const availableClubCount = availableClubs.filter(
-            (club) => club.championshipId === championship
+        const championshipData = championships.find(
+            (item) => item.id === championship
+        )
+        const championsLeagueSelected = championshipData?.name
+            .toLocaleLowerCase('pt-BR') === 'champions league'
+        const availableClubCount = availableClubs.filter((club) =>
+            championsLeagueSelected || club.championshipId === championship
         ).length
 
         form.setFieldsValue({
@@ -95,6 +124,7 @@ export const MatchFormModal = ({
             visitorIsRegistered: availableClubCount > 1 ? undefined : 'no',
             awayClubId: undefined,
             awayTeamName: undefined,
+            weekDay: undefined,
         })
     }
 
@@ -231,7 +261,7 @@ export const MatchFormModal = ({
                             rules={[{ required: true, message: 'Selecione o dia da semana' }]}
                         >
                             <Select
-                                options={weekDayOptions}
+                                options={availableWeekDayOptions}
                                 placeholder="Selecione o dia"
                             />
                         </Form.Item>
