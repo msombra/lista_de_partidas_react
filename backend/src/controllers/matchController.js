@@ -88,6 +88,7 @@ const getMatchData = async (body, editingId) => {
     const clubIds = [homeClubId, awayClubId].filter(Boolean)
     const clubAlreadyUsed = await matchRepository.findUsingClubIds(
         clubIds,
+        championshipId,
         editingId
     )
     if (clubAlreadyUsed) {

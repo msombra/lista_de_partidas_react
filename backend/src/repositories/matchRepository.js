@@ -15,9 +15,10 @@ export const matchRepository = {
         where: { id },
         include: includeRelations,
     }),
-    findUsingClubIds: (clubIds, excludeId) => prisma.match.findFirst({
+    findUsingClubIds: (clubIds, championshipId, excludeId) => prisma.match.findFirst({
         where: {
             id: excludeId ? { not: excludeId } : undefined,
+            championshipId,
             OR: [
                 { homeClubId: { in: clubIds } },
                 { awayClubId: { in: clubIds } },

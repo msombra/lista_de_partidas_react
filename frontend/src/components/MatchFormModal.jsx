@@ -24,30 +24,29 @@ export const MatchFormModal = ({
             label: transmission.name,
         })), [transmissions])
 
-    const availableClubs = useMemo(() => {
-        const usedClubIds = new Set(
-            matches
-                .filter((scheduledMatch) => scheduledMatch.id !== match?.id)
-                .flatMap((scheduledMatch) => [
-                    scheduledMatch.homeClubId,
-                    scheduledMatch.awayClubId,
-                ])
-                .filter(Boolean)
-        )
-
-        return clubs.filter((club) => !usedClubIds.has(club.id))
-    }, [clubs, match?.id, matches])
-
     const championshipOptions = championships
         .filter((championship) => {
             const isChampionsLeague = championship.name
                 .toLocaleLowerCase('pt-BR') === 'champions league'
-
-            return isChampionsLeague
-                ? availableClubs.length > 0
-                : availableClubs.some(
+            const usedClubIds = new Set(
+                matches
+                    .filter((scheduledMatch) =>
+                        scheduledMatch.id !== match?.id
+                        && scheduledMatch.championshipId === championship.id
+                    )
+                    .flatMap((scheduledMatch) => [
+                        scheduledMatch.homeClubId,
+                        scheduledMatch.awayClubId,
+                    ])
+                    .filter(Boolean)
+            )
+            const eligibleClubs = isChampionsLeague
+                ? clubs
+                : clubs.filter(
                     (club) => club.championshipId === championship.id
                 )
+
+            return eligibleClubs.some((club) => !usedClubIds.has(club.id))
         })
         .map((championship) => ({
             value: championship.id,
@@ -60,11 +59,23 @@ export const MatchFormModal = ({
     const isChampionsLeague = selectedChampionshipData?.name
         .toLocaleLowerCase('pt-BR') === 'champions league'
 
+    const usedClubIds = new Set(
+        matches
+            .filter((scheduledMatch) =>
+                scheduledMatch.id !== match?.id
+                && scheduledMatch.championshipId === selectedChampionship
+            )
+            .flatMap((scheduledMatch) => [
+                scheduledMatch.homeClubId,
+                scheduledMatch.awayClubId,
+            ])
+            .filter(Boolean)
+    )
+    const availableClubs = clubs.filter((club) =>
+        !usedClubIds.has(club.id)
+        && (isChampionsLeague || club.championshipId === selectedChampionship)
+    )
     const clubOptions = availableClubs
-        .filter((club) =>
-            isChampionsLeague
-            || club.championshipId === selectedChampionship
-        )
         .map((club) => ({ value: club.id, label: club.name }))
 
     const availableWeekDayOptions = isChampionsLeague
@@ -112,8 +123,21 @@ export const MatchFormModal = ({
         )
         const championsLeagueSelected = championshipData?.name
             .toLocaleLowerCase('pt-BR') === 'champions league'
-        const availableClubCount = availableClubs.filter((club) =>
-            championsLeagueSelected || club.championshipId === championship
+        const usedClubIdsForChampionship = new Set(
+            matches
+                .filter((scheduledMatch) =>
+                    scheduledMatch.id !== match?.id
+                    && scheduledMatch.championshipId === championship
+                )
+                .flatMap((scheduledMatch) => [
+                    scheduledMatch.homeClubId,
+                    scheduledMatch.awayClubId,
+                ])
+                .filter(Boolean)
+        )
+        const availableClubCount = clubs.filter((club) =>
+            !usedClubIdsForChampionship.has(club.id)
+            && (championsLeagueSelected || club.championshipId === championship)
         ).length
 
         form.setFieldsValue({
