@@ -32,6 +32,7 @@ import {
     listMatches,
     updateMatch,
 } from '@/services/matchService.js'
+import { listTransmissions } from '@/services/transmissionService.js'
 
 const { Text, Title } = Typography
 const alwaysVisibleDays = new Set(['sábado', 'domingo'])
@@ -47,6 +48,7 @@ export const Partidas = () => {
     const [matches, setMatches] = useState([])
     const [clubs, setClubs] = useState([])
     const [championships, setChampionships] = useState([])
+    const [transmissions, setTransmissions] = useState([])
     const [loading, setLoading] = useState(true)
     const [modalOpen, setModalOpen] = useState(false)
     const [editingMatch, setEditingMatch] = useState(null)
@@ -56,12 +58,23 @@ export const Partidas = () => {
     useEffect(() => {
         let active = true
 
-        Promise.all([listMatches(), listClubs(), listChampionships()])
-            .then(([matchData, clubData, championshipData]) => {
+        Promise.all([
+            listMatches(),
+            listClubs(),
+            listChampionships(),
+            listTransmissions(),
+        ])
+            .then(([
+                matchData,
+                clubData,
+                championshipData,
+                transmissionData,
+            ]) => {
                 if (!active) return
                 setMatches(matchData)
                 setClubs(clubData)
                 setChampionships(championshipData)
+                setTransmissions(transmissionData)
                 setActiveDays(getVisibleWeekDays(matchData))
             })
             .catch((error) => notification.error({
@@ -294,6 +307,7 @@ export const Partidas = () => {
                 matches={matches}
                 clubs={clubs}
                 championships={championships}
+                transmissions={transmissions}
                 onCancel={closeModal}
                 onSave={handleSave}
             />

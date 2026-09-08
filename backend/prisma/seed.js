@@ -36,13 +36,22 @@ const matches = [
     ['Serie A', 'Milan', 'Inter de Milão', 'domingo', '15:45', 'CazéTV'],
 ]
 
-const main = async () => {
-    await prisma.match.deleteMany()
-    await prisma.club.deleteMany()
-    await prisma.championship.deleteMany()
+const transmissions = [
+    'ESPN',
+    'CazéTV',
+    'HBO',
+    'GoatTV',
+    'YouTube',
+    'Outro',
+]
 
+const main = async () => {
     for (const name of championships) {
-        await prisma.championship.create({ data: { name } })
+        await prisma.championship.upsert({
+            where: { name },
+            update: {},
+            create: { name },
+        })
     }
 
     const championshipRecords = await prisma.championship.findMany()
@@ -51,10 +60,16 @@ const main = async () => {
     )
 
     for (const [name, championshipName] of clubs) {
-        await prisma.club.create({
-            data: {
+        const championshipId = championshipByName.get(championshipName).id
+
+        await prisma.club.upsert({
+            where: {
+                name_championshipId: { name, championshipId },
+            },
+            update: {},
+            create: {
                 name,
-                championshipId: championshipByName.get(championshipName).id,
+                championshipId,
             },
         })
     }
@@ -62,23 +77,33 @@ const main = async () => {
     const clubRecords = await prisma.club.findMany()
     const clubByName = new Map(clubRecords.map((club) => [club.name, club]))
 
-    for (const [
-        championshipName,
-        homeTeam,
-        awayTeam,
-        weekDay,
-        time,
-        broadcast,
-    ] of matches) {
-        await prisma.match.create({
-            data: {
-                championshipId: championshipByName.get(championshipName).id,
-                homeClubId: clubByName.get(homeTeam).id,
-                awayClubId: clubByName.get(awayTeam).id,
-                weekDay,
-                time,
-                broadcast,
-            },
+    if (await prisma.match.count() === 0) {
+        for (const [
+            championshipName,
+            homeTeam,
+            awayTeam,
+            weekDay,
+            time,
+            broadcast,
+        ] of matches) {
+            await prisma.match.create({
+                data: {
+                    championshipId: championshipByName.get(championshipName).id,
+                    homeClubId: clubByName.get(homeTeam).id,
+                    awayClubId: clubByName.get(awayTeam).id,
+                    weekDay,
+                    time,
+                    broadcast,
+                },
+            })
+        }
+    }
+
+    for (const name of transmissions) {
+        await prisma.transmission.upsert({
+            where: { name },
+            update: {},
+            create: { name },
         })
     }
 }

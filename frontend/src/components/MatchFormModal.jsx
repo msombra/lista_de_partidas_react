@@ -3,21 +3,13 @@ import { useEffect, useMemo } from 'react'
 
 import { weekDayOptions } from '@/data/matchOptions.js'
 
-const broadcastOptions = [
-    'ESPN',
-    'CazéTV',
-    'HBO',
-    'GoatTV',
-    'YouTube',
-    'Outro',
-].map((broadcast) => ({ value: broadcast, label: broadcast }))
-
 export const MatchFormModal = ({
     open,
     match,
     matches,
     clubs,
     championships,
+    transmissions,
     onCancel,
     onSave,
 }) => {
@@ -26,6 +18,11 @@ export const MatchFormModal = ({
     const selectedHomeClubId = Form.useWatch('homeClubId', form)
     const visitorIsRegistered = Form.useWatch('visitorIsRegistered', form)
     const selectedBroadcast = Form.useWatch('broadcastOption', form)
+    const broadcastOptions = useMemo(() =>
+        transmissions.map((transmission) => ({
+            value: transmission.name,
+            label: transmission.name,
+        })), [transmissions])
 
     const availableClubs = useMemo(() => {
         const usedClubIds = new Set(
@@ -107,7 +104,7 @@ export const MatchFormModal = ({
             broadcastOption: undefined,
             otherBroadcast: undefined,
         })
-    }, [form, match, open])
+    }, [broadcastOptions, form, match, open])
 
     const handleChampionshipChange = (championship) => {
         const championshipData = championships.find(

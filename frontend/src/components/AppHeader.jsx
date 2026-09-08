@@ -6,6 +6,7 @@ import {
     SunOutlined,
     TeamOutlined,
     TrophyOutlined,
+    VideoCameraOutlined,
 } from '@ant-design/icons'
 import { Button, Dropdown, Grid, Layout, Menu, theme } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -17,6 +18,11 @@ const navigationItems = [
     { key: '/partidas', icon: <ScheduleOutlined />, label: 'Partidas' },
     { key: '/clubes', icon: <TeamOutlined />, label: 'Clubes' },
     { key: '/campeonatos', icon: <TrophyOutlined />, label: 'Campeonatos' },
+    {
+        key: '/transmissoes',
+        icon: <VideoCameraOutlined />,
+        label: 'Transmissões',
+    },
 ]
 
 const themeItems = [

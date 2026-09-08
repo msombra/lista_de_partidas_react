@@ -17,7 +17,7 @@ import {
 import { useState } from 'react'
 
 const { Search } = Input
-const { Title } = Typography
+const { Text, Title } = Typography
 const { useBreakpoint } = Grid
 
 export const EntityDataTable = ({
@@ -32,6 +32,7 @@ export const EntityDataTable = ({
     onEdit,
     onDelete,
     loading = false,
+    isRecordProtected = () => false,
 }) => {
     const { modal } = AntdApp.useApp()
     const screens = useBreakpoint()
@@ -66,6 +67,10 @@ export const EntityDataTable = ({
             align: 'center',
             render: (_, record) => {
                 const recordLabel = getRecordLabel(record)
+
+                if (isRecordProtected(record)) {
+                    return <Text type="secondary">Fixo</Text>
+                }
 
                 return (
                     <Space>
