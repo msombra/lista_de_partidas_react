@@ -13,6 +13,7 @@ import {
     Card,
     Collapse,
     Flex,
+    Grid,
     Space,
     Tag,
     Tooltip,
@@ -35,6 +36,7 @@ import {
 import { listTransmissions } from '@/services/transmissionService.js'
 
 const { Text, Title } = Typography
+const { useBreakpoint } = Grid
 const alwaysVisibleDays = new Set(['sábado', 'domingo'])
 const getVisibleWeekDays = (matches) => weekDayOptions
     .filter(({ value }) =>
@@ -44,6 +46,7 @@ const getVisibleWeekDays = (matches) => weekDayOptions
     .map(({ value }) => value)
 
 export const Partidas = () => {
+    const screens = useBreakpoint()
     const { modal, notification } = AntdApp.useApp()
     const [matches, setMatches] = useState([])
     const [clubs, setClubs] = useState([])
@@ -254,43 +257,75 @@ export const Partidas = () => {
                 wrap
                 style={{ marginBottom: 16 }}
             >
-                <Button
-                    type="primary"
-                    icon={<PlusOutlined />}
-                    onClick={openNewMatchModal}
-                >
-                    Inserir Partida
-                </Button>
+                <Tooltip title={!screens.md ? 'Inserir Partida' : null}>
+                    <Button
+                        type="primary"
+                        icon={<PlusOutlined />}
+                        aria-label="Inserir Partida"
+                        onClick={openNewMatchModal}
+                    >
+                        {screens.md && 'Inserir Partida'}
+                    </Button>
+                </Tooltip>
 
                 {matches.length > 0 && (
                     <>
-                        <Button
-                            icon={showActions
-                                ? <EyeInvisibleOutlined />
-                                : <EyeOutlined />}
-                            onClick={() => setShowActions((current) => !current)}
+                        <Tooltip
+                            title={!screens.md
+                                ? (showActions ? 'Ocultar Ações' : 'Exibir Ações')
+                                : null}
                         >
-                            {showActions ? 'Ocultar Ações' : 'Exibir Ações'}
-                        </Button>
+                            <Button
+                                icon={showActions
+                                    ? <EyeInvisibleOutlined />
+                                    : <EyeOutlined />}
+                                aria-label={showActions
+                                    ? 'Ocultar Ações'
+                                    : 'Exibir Ações'}
+                                onClick={() => setShowActions((current) => !current)}
+                            >
+                                {screens.md && (
+                                    showActions ? 'Ocultar Ações' : 'Exibir Ações'
+                                )}
+                            </Button>
+                        </Tooltip>
 
-                        <Button
-                            icon={allDaysAreOpen
-                                ? <CompressOutlined />
-                                : <ExpandAltOutlined />}
-                            onClick={() => setActiveDays(
-                                allDaysAreOpen ? [] : visibleWeekDays
-                            )}
+                        <Tooltip
+                            title={!screens.md
+                                ? (allDaysAreOpen
+                                    ? 'Recolher Dias'
+                                    : 'Expandir Dias')
+                                : null}
                         >
-                            {allDaysAreOpen ? 'Recolher Dias' : 'Expandir Dias'}
-                        </Button>
+                            <Button
+                                icon={allDaysAreOpen
+                                    ? <CompressOutlined />
+                                    : <ExpandAltOutlined />}
+                                aria-label={allDaysAreOpen
+                                    ? 'Recolher Dias'
+                                    : 'Expandir Dias'}
+                                onClick={() => setActiveDays(
+                                    allDaysAreOpen ? [] : visibleWeekDays
+                                )}
+                            >
+                                {screens.md && (
+                                    allDaysAreOpen
+                                        ? 'Recolher Dias'
+                                        : 'Expandir Dias'
+                                )}
+                            </Button>
+                        </Tooltip>
 
-                        <Button
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={handleClearMatches}
-                        >
-                            Limpar Partidas
-                        </Button>
+                        <Tooltip title={!screens.md ? 'Limpar Partidas' : null}>
+                            <Button
+                                danger
+                                icon={<DeleteOutlined />}
+                                aria-label="Limpar Partidas"
+                                onClick={handleClearMatches}
+                            >
+                                {screens.md && 'Limpar Partidas'}
+                            </Button>
+                        </Tooltip>
                     </>
                 )}
             </Flex>
