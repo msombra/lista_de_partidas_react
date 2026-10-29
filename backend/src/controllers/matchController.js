@@ -40,7 +40,9 @@ const getMatchData = async (body, editingId) => {
     const awayClubId = body.awayClubId
         ? parseId(body.awayClubId, 'Time visitante')
         : null
-    const awayTeamName = awayClubId ? null : body.awayTeamName?.trim()
+    const awayTeamName = awayClubId ? null : body.awayTeamName
+        ?.trim()
+        .replace(/(^|\s)\p{L}/gu, (initial) => initial.toLocaleUpperCase('pt-BR'))
     const weekDay = body.weekDay?.trim()
     const time = body.time?.trim()
     const broadcast = body.broadcast?.trim()
